@@ -20,17 +20,24 @@ class Perceptron:
     def Calculate_Weights_Average(self):
         average = 0
         for i in range(self.input_dim):
-            average = average + self.weights[i]
+            average += self.weights[i]
         average /= self.input_dim
         return average
+    
+    # Activation function
+    def Is_active(self, y, label):
+        if (((y <= 0) and (label > 0)) or ((y > 0) and (label < 0))):
+            return True
+        return False
 
     def learn(self,learning_input, learning_answer):
-        
+
+        # calculate dots of input training data and current weights
         y = np.dot(learning_input, self.weights)
         
-        # Activation function
         # Check answer is true or not & calculate mistakes
-        if ((((y <= 0) and (learning_answer > 0)) or ((y > 0) and (learning_answer < 0)))):
+       
+        if (not self.Is_active(y, learning_answer)):
             self.mis += 1
         
         # Update weight for each edge & Find Largest weight change
@@ -68,7 +75,7 @@ FileContentLines = data.readlines()
 # initialize our perceptron
 BC = Perceptron(0.2, 3)
 
-# parse data and fill lists
+# parse data and fill lists for later uses
 points_zero_x = []
 points_zero_y = []
 points_one_x = []
@@ -108,7 +115,7 @@ while (BC.max_change > limit):
 
 # print number of iterations and final weights
 print("iterations: ", iter)
-print(BC.weights)
+print("final weights: ",BC.weights)
 
 
 # plotting the Points and final Separator Line
@@ -128,7 +135,6 @@ plt.xlabel('Iterations')
 plt.ylabel('Mistakes')
 plt.title('Number of Mistakes in each iteration')
 plt.show()
-
 
 # This cell is for your codes.
 
