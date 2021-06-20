@@ -1,0 +1,113 @@
+FUNCTION_BLOCK Inverted_Pendulum
+
+    VAR_INPUT
+        theta : REAL;
+        theta_dot : REAL;
+        x : REAL; 
+        x_dot : REAL; 
+        x_dot_dot : REAL; 
+        theta_dot_dot : REAL; 
+    END_VAR
+
+    VAR_OUTPUT
+        f : REAL;
+    END_VAR
+
+    FUZZIFY theta
+        TERM up := (135,0) (180,1) (225,0)
+        TERM exact_up := (178,0) (180,1) (182,0);
+        TERM up_little_right := (170,0) (173.5,1) (177,0)
+        TERM up_little_left := (183,0) (186.5,1) (190,0)
+        TERM up_too_little_right := (177,0) (178,1) (180,0)
+        TERM up_too_little_left := (180,0) (182,1) (183,0)
+        TERM up_right := (90,0) (135,1) (160,0);
+        TERM up_left := (200,0) (225,1) (270,0);
+        TERM left_down := (270,0) (315,1) (360,0);
+        TERM down := (300,0) (360,1) (60,0);
+        TERM right_down := (-1,0) (45,1) (90,0);
+    END_FUZZIFY
+
+    FUZZIFY theta_dot
+        TERM clock_wise_slow := (-6,0) (-3,1) (0,0)
+        TERM clock_wise_fast := (-100,0) (-8,1) (-5,0)
+        TERM clock_wise := (-10,0) (-5,1) (0,0)
+        TERM zero := (-1,0) (0,1) (1,0)
+        TERM anti_clock_wise_slow := (0,0) (3,1) (6,0)
+        TERM anti_clock_wise_fast := (5,0) (8,1) (100,0)
+        TERM anti_clock_wise := (0,0) (5,1) (10,0)
+    END_FUZZIFY
+
+    FUZZIFY x_dot
+        TERM left_fast := (-10,1) (-5,0);
+        TERM left_slow := (-6,0) (-15,1) (0,0);
+        TERM stop := (-2,0) (0,1) (2,0);
+        TERM right_slow := (0,0) (15,1) (30,0);
+        TERM right_fast := (4,0) (10,1);
+    END_FUZZIFY
+
+
+    DEFUZZIFY f
+        TERM right_very_low = (0,0) (2.5,1) (5,0);
+        TERM right_low = (0,0) (15,1) (30,0);
+        TERM right_high = (0,0) (35,1) (50,0);
+        TERM right_very_high = (0,0) (75,1) (150,0);
+        TERM right_ultra_high = (0,0) (150,1) (300,0);
+        TERM zero = (-15,0) (0,1) (15,0);
+        TERM left_very_low = (-5,0) (-2.5,1) (0,0);
+        TERM left_low = (-30,0) (-15,1) (0,0);
+        TERM left_high = (-50,0) (-35,1) (0,0);
+        TERM left_very_high = (-150,0) (-75,1) (0,0);
+        TERM left_ultra_high = (-300,0) (-150,1) (0,0);
+
+        METHOD: COG;
+        DEFAULT := 0;
+        (* terms *)
+    END_DEFUZZIFY
+
+    RULEBLOCK Inverted_Pendulum
+        AND : AlgebraicProduct;
+        OR : MAX;
+       
+        RULE 1 :
+            IF
+                theta IS left_down
+                AND theta_dot IS anti_clock_wise_slow
+            THEN f IS left_very_high;
+
+      
+        RULE 2 :
+            IF
+                theta IS right_down
+                AND theta_dot IS clock_wise_slow
+            THEN f IS right_very_high;
+        
+
+
+        RULE 3 :
+            IF
+                theta IS up_little_left
+                AND theta_dot IS anti_clock_wise
+            THEN f IS left_very_high;
+
+        RULE 4 :
+            IF
+                theta IS up_little_right
+                AND theta_dot IS clock_wise
+            THEN f IS right_very_high;
+
+        RULE 5 :
+            IF
+                theta IS up_too_little_left
+                AND theta_dot IS anti_clock_wise
+            THEN f IS left_low;
+
+        RULE 6 :
+            IF
+                theta IS up_too_little_right
+                AND theta_dot IS clock_wise
+            THEN f IS right_low;
+        
+        
+    END_RULEBLOCK
+
+END_FUNCTION_BLOCK
